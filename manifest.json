@@ -1,0 +1,25 @@
+{
+  "name": "TrainTracker",
+  "short_name": "TrainTracker",
+  "description": "Live DB Abfahrten",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#f5f6f8",
+  "background_color": "#f5f6f8",
+  "lang": "de",
+  "icons": [
+    {
+      "src": "icon192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
