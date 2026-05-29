@@ -1386,7 +1386,7 @@ function renderResponse(path, rawXml, activeProducts) {
     }
   } catch(_) {}
   return '';
-})
+}
   .filter(s=>(!s.abfahrtDate||s.abfahrtDate>=now)&&activeProducts.has(s.prod));
 .sort((a,b)=>a.abfahrtRaw.localeCompare(b.abfahrtRaw));
 return makeCollapsible(
