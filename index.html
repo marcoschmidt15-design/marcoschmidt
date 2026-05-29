@@ -1,17 +1,29 @@
-<!-- Marco Version 1.3 -->
+<!-- Marco Version 1.4 -->
 
 <!DOCTYPE html>
-
 <html lang="de">
-<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" /><meta name="apple-mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-status-bar-style" content="default" /><meta name="apple-mobile-web-app-title" content="TrainTracker" /><meta name="theme-color" content="#f5f6f8" /><title>TrainTracker</title><link rel="preconnect" href="https://fonts.googleapis.com" /><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" /><!-- PWA Manifest inline via data-URI --><link rel="manifest" href="data:application/manifest+json,{
- %22name%22:%22TrainTracker%22,
- %22short_name%22:%22TrainTracker%22,
- %22start_url%22:%22.%22,
- %22display%22:%22standalone%22,
- %22background_color%22:%22%23f5f6f8%22,
- %22theme_color%22:%22%23f5f6f8%22,
- %22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232563eb'/%3E%3Ctext y='.9em' font-size='72' x='12'%3E🚆%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22any%22,%22type%22:%22image/svg+xml%22}]
- }" /><style>:root{
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <!-- ── PWA: Android / Chrome / Desktop ── -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#f5f6f8" id="meta-theme" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <!-- ── PWA: iOS Home Screen ── -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="TrainTracker" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="apple-touch-icon" href="icon192.png" />
+
+  <!-- ── App meta ── -->
+  <meta name="application-name" content="TrainTracker" />
+  <meta name="description" content="Live DB Abfahrten" />
+
+  <title>TrainTracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" /><style>:root{
 --bg:#f5f6f8;
 --surface:#ffffff;
 --surface2:#f0f1f4;
@@ -537,7 +549,10 @@ border-bottom:1px solid transparent;
  LOG MODAL
 ══════════════════════════════════════ -->
 <div class="modal-backdrop" id="log-backdrop"><div class="modal" style="width:min(680px,100%)"><div class="modal-header"><span class="modal-title" data-i18n="logTitle">📋 API-Protokoll</span><div style="display:flex;gap:8px;align-items:center"><button class="btn" style="font-size:.67rem;padding:3px 9px" id="btn-log-clear" data-i18n="clear">Leeren</button><button class="modal-close" data-close="log-backdrop">✕</button></div></div><div style="padding:12px 14px;max-height:68vh;overflow-y:auto"><div id="log-entries"><div class="log-empty">Noch keine Aufrufe.</div></div></div></div>
-</div><script>const CFG = {
+</div><script>/* ── Zentrale Konfiguration ────────────────────────────────────────────
+   Alle API- und Timing-Konstanten an einem Ort.
+   AUTH_HEADERS wird bei jedem API-Call als HTTP-Header mitgeschickt.   ──── */
+const CFG = {
  API: 'https://apis.deutschebahn.com/db-api-marketplace/apis/timetables/v1',
  CLIENT_ID: '2504fd2780ec4144e5434a2498d80d93',
  API_KEY: '8ed4b2fc489c3b028bea88bf39e20f1c',
@@ -550,6 +565,10 @@ const AUTH = {
  'DB-Api-Key': CFG.API_KEY,
  'Accept': 'application/xml',
 };
+/* ── Übersetzungen (i18n) ───────────────────────────────────────────────
+   Alle UI-Strings in Deutsch (de) und Englisch (en).
+   t(key) gibt den String der aktiven Sprache zurück;
+   fehlt ein Key in EN, fällt t() automatisch auf DE zurück.            ──── */
 const LANGS = {
  de: {
  langBtn: 'DE',
@@ -643,6 +662,11 @@ const LANGS = {
 };
 let LANG = 'de';
 let DARK = false;
+/* ── Persistenz (localStorage) ─────────────────────────────────────────
+   Alle Nutzereinstellungen werden unter PREFS_KEY gespeichert.
+   savePrefs() serialisiert den aktuellen UI-Zustand.
+   loadPrefs() stellt ihn beim Seitenstart wieder her.
+   Im Private Mode schlägt localStorage still fehl → Defaults bleiben.  ──── */
 const PREFS_KEY = 'traintracker_prefs';
 function savePrefs() {
  try {
@@ -674,7 +698,7 @@ function loadPrefs() {
  if (p.dark) {
  DARK = true;
  document.documentElement.classList.add('dark');
- document.querySelector('meta[name="theme-color"]')
+ $("meta-theme")
  ?.setAttribute('content', '#0e0f14');
  }
  if (p.fromVal && $('inp-from')) $('inp-from').value = p.fromVal;
@@ -721,7 +745,7 @@ function syncPill(btnId, activeIdx) {
 function toggleDark() {
  DARK = !DARK;
  document.documentElement.classList.toggle('dark', DARK);
- document.querySelector('meta[name="theme-color"]')
+ $("meta-theme")
  ?.setAttribute('content', DARK ? '#0e0f14' : '#f5f6f8');
  applyLang();
  savePrefs();
@@ -739,6 +763,9 @@ function toggleLang() {
  const le = $('log-entries');
  if (le && !LOG.length) le.innerHTML = `<div class="log-empty">${t('logEmpty')}</div>`;
 }
+/* ── Produktklassen ────────────────────────────────────────────────────
+   Mappt interne Produkt-Keys auf i18n-Schlüssel und Checkbox-IDs.
+   toProduct(cat, f) liefert den Key; productLabel(key) den Anzeigetext. ──── */
 const PRODUCT = {
  suburban: { labelKey: 'p.suburban', cbId: 'fc-sbahn' },
  subway: { labelKey: 'p.subway', cbId: 'fc-ubahn' },
@@ -747,6 +774,11 @@ const PRODUCT = {
  tram: { labelKey: 'p.tram', cbId: 'fc-tram' },
  bus: { labelKey: 'p.bus', cbId: 'fc-bus' },
 };
+/* ── Anwendungszustand ──────────────────────────────────────────────────
+   Zentrales State-Objekt – kein gestreuter globaler State.
+   fromStop/toStop: aufgelöste EVA-Objekte { id, name }
+   departures: Array der zuletzt geladenen Abfahrten
+   autoTimer: setInterval-Handle für Auto-Refresh                        ──── */
 const S = {
  fromStop: null,
  toStop: null,
@@ -758,6 +790,12 @@ const S = {
 };
 const LOG = [];
 const $ = id => document.getElementById(id);
+/* ── Zeitfunktionen ────────────────────────────────────────────────────
+   DB-Format: YYMMDDhhmm (10 Zeichen), z.B. "2506141435" = 14.06.2025 14:35
+   fmtTime()   → "14:35"  aus einem Date-Objekt
+   fmtDBTime() → "14:35"  direkt aus dem DB-String (schneller, kein Date)
+   minsUntil() → verbleibende Minuten bis zu einem Date
+   toDBDate()  → "250614" aus einem Date für API-Requests                ──── */
 function parseDBTime(s) {
  if (!s || s.length < 10) return null;
  return new Date(
@@ -781,6 +819,11 @@ function toDBDate(d) {
  + String(d.getMonth()+1).padStart(2,'0')
  + String(d.getDate()).padStart(2,'0');
 }
+/* ── Countdown-Farben ───────────────────────────────────────────────────
+   Zwei konfigurierbare Schwellenwerte (th-green, th-red) definieren
+   drei Zonen: grün (≥green), gelb (≥red), rot (<red).
+   getThresholds() liest die aktuellen Eingabewerte.
+   cdClass()       gibt die CSS-Klasse zurück (cd-green/yellow/red/now). ──── */
 function getThresholds() {
  const green = Math.max(2, parseInt($('th-green')?.value || '11',10));
  const red = Math.max(1, parseInt($('th-red')?.value || '7',10));
@@ -822,6 +865,13 @@ function buildLine(cat, lineAttr) {
 function esc(s) {
  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+/* ── API-Schicht ────────────────────────────────────────────────────────
+   Alle HTTP-Requests laufen durch apiFetch().
+   Endpunkte der DB Timetables API:
+     GET /station/{name}          → EVA-Nummer zu einem Bahnhofsnamen
+     GET /plan/{eva}/{date}/{HH}  → Fahrplan für eine Stunde
+     GET /fchg/{eva}              → Echtzeit-Verspätungen & Ausfälle
+   Jeder Call wird im LOG protokolliert (Zeitstempel, Status, Dauer).   ──── */
 async function apiFetch(path, params = {}, note = '') {
  const url = `${CFG.API}${path}`;
  const t0 = performance.now();
@@ -847,6 +897,11 @@ async function apiFetch(path, params = {}, note = '') {
  throw err;
  }
 }
+/* ── Stations-Lookup ────────────────────────────────────────────────────
+   resolveStop() löst einen Bahnhofsnamen oder eine EVA-Nummer zu einem
+   Stop-Objekt { id, name } auf. Rein numerische Eingaben werden direkt
+   als EVA-Nummer behandelt (kein API-Call nötig).
+   Bei nicht gefundenem Bahnhof wird das Inputfeld rot markiert.         ──── */
 async function resolveStop(inputEl, badge) {
  const isEl = inputEl instanceof HTMLElement;
  const v = isEl ? inputEl.value.trim() : inputEl.trim();
@@ -874,6 +929,12 @@ async function resolveStop(inputEl, badge) {
  if (inp) inp.classList.remove('error');
  return stop;
 }
+/* ── Timetable laden ────────────────────────────────────────────────────
+   Lädt Plan + Echtzeit für das konfigurierte Zeitfenster (CFG.WINDOW_MIN).
+   requiredHours() berechnet welche Stunden-Requests nötig sind:
+     - Immer die aktuelle Stunde
+     - Zweite Stunde nur wenn das Fenster in die nächste Stunde reicht
+   Plan und Echtzeit werden parallel geladen (Promise.all).              ──── */
 function requiredHours(now) {
  const cutoff = new Date(now.getTime() + CFG.WINDOW_MIN * 60_000);
  const hours = [{ date: toDBDate(now), hour: String(now.getHours()).padStart(2,'0') }];
@@ -905,6 +966,12 @@ async function loadTimetable(evaId) {
  );
  return { stops, changeMap };
 }
+/* ── Abfahrten parsen & filtern ─────────────────────────────────────────
+   parseStop() verarbeitet einen XML-<s>-Knoten zu einem Abfahrtsobjekt.
+   MATCHING-LOGIK: dp/@ppth enthält alle Folgestationen als Pipe-Liste.
+   Statt nur die Endhaltestelle zu prüfen, werden alle Wörter des Ziel-
+   namens gegen den gesamten Pfad geprüft → Zwischenstationen werden
+   korrekt gefunden (z.B. Feuerbach in einem Zug nach Backnang).         ──── */
 function parseStop(stop, changeMap, now, cutoff, toKeyword) {
  const tripId = stop.getAttribute('id');
  const dp = stop.querySelector('dp');
@@ -956,6 +1023,10 @@ async function fetchDepartures(fromStop, toStop) {
  .sort((a, b) => a.actual - b.actual)
  .slice(0, CFG.MAX_DEPS);
 }
+/* ── Render: Departure Board ────────────────────────────────────────────
+   renderCard()  → eine einzelne Abfahrtskarte (L→R: Linie, Ziel, Zeit)
+   renderBoard() → alle Karten oder State-Card (leer/Fehler)
+   Layout: [① Linienchip] [② Richtung+Ziel] [③ Countdown-Badge]         ──── */
 function renderCard(dep, idx) {
  const mins = minsUntil(dep.actual);
  const delay = dep.delay > 0;
@@ -978,6 +1049,11 @@ function renderBoard(deps) {
 function renderError(msg) {
  $('board').innerHTML = `<div class="state-card"><div class="state-icon">⚠️</div><div class="state-title">${t('errorTitle')}</div><div class="state-msg">${esc(msg)}</div></div>`;
 }
+/* ── Render: Route-Panel ────────────────────────────────────────────────
+   Zeigt unter den Abfahrtskarten die vollständige Strecke.
+   Jede Linie bekommt eine ausklappbare Karte mit allen Haltestellen.
+   buildStopList() markiert: Abfahrtsbahnhof (grün), Zielhaltestelle
+   (blau), bereits vergangene Halte (ausgegraut).                        ──── */
 function renderRoutePanel(deps, toName) {
  const panel = $('route-panel');
  if (!deps.length) {
@@ -1005,6 +1081,11 @@ function buildStopList(dep, toKey) {
  });
  return [...prev, origin, ...next].join('');
 }
+/* ── Countdown-Ticker ───────────────────────────────────────────────────
+   Aktualisiert alle Countdown-Badges alle 15 Sekunden im DOM.
+   Kein API-Call – rein clientseitige Zeitberechnung.
+   refreshCountdownColors() wird zusätzlich bei Schwellenwert-Änderungen
+   aufgerufen, um Farben sofort anzupassen.                               ──── */
 function startCdTicker() {
  if (S.cdTimer) clearInterval(S.cdTimer);
  S.cdTimer = setInterval(() => {
@@ -1045,6 +1126,11 @@ function setLoading(v) {
  lbl.textContent = 'Suchen';
  }
 }
+/* ── Auto-Refresh ───────────────────────────────────────────────────────
+   Lädt Abfahrten alle CFG.REFRESH_MS Millisekunden automatisch neu.
+   startAuto() / stopAuto() steuern den setInterval-Timer.
+   setAutoUI() aktualisiert den Button-Stil inkl. erzwungenem Reflow
+   (void btn.offsetWidth) damit Safari die Farbe sofort rendert.         ──── */
 function startAuto() {
  stopAuto();
  if (!S.fromStop) return;
@@ -1073,6 +1159,11 @@ function toggleAuto() {
  }
  savePrefs();
 }
+/* ── Ladefunktionen ─────────────────────────────────────────────────────
+   runRefresh(): Lädt Abfahrten mit bekannten EVA-IDs neu (kein Lookup).
+                 Wird vom Auto-Refresh und manuell aufgerufen.
+   runSearch():  Vollständige Suche: EVA-Lookup + Abfahrten laden.
+                 Kein Cache – alles wird frisch vom Server geholt.        ──── */
 async function runRefresh() {
  if (!S.fromStop || !S.toStop || S.loading) return;
  LOG.length = 0; renderLog();
@@ -1111,6 +1202,12 @@ async function runSearch() {
  if (S.autoOn) startAuto();
 }
 let _rc = 0;
+/* ── API-Log ────────────────────────────────────────────────────────────
+   logAdd()        → Eintrag vorne ins LOG-Array einfügen (max. 80)
+   renderLog()     → Alle Einträge als HTML ins Log-Modal schreiben
+   renderLogEntry()→ Einen Eintrag mit Metadaten + Parameter-Tabelle
+   renderResponse()→ XML-Antwort als ausklappbare Tabelle
+                     Unterstützt /station, /plan, /fchg                  ──── */
 function logAdd(entry) { LOG.unshift(entry); if (LOG.length > 80) LOG.pop(); }
 function renderLog() {
  const el = $('log-entries');
@@ -1158,17 +1255,137 @@ function makeCollapsible(labelHtml, contentHtml, open = false) {
  ${contentHtml}
  </details>`;
 }
+/**
+ * Parst die XML-Antwort eines API-Calls und rendert sie
+ * als ausklappbare Tabelle im Log-Modal.
+ * Drei Endpunkte werden unterstützt:
+ *   /station/{name} → Liste gefundener Haltestellen
+ *   /plan/{eva}/{date}/{hour} → Fahrplan (nach Zeit sortiert, Vergangenheit gefiltert)
+ *   /fchg/{eva} → Echtzeit-Änderungen (Verspätungen, Ausfälle)
+ *
+ * @param {string} path           - API-Pfad des Requests
+ * @param {string} rawXml         - Roh-XML der Antwort
+ * @param {Set}    activeProducts - Aktive Verkehrsmittel-Filter (für Plan-Tabelle)
+ * @returns {string} HTML-String oder leer
+ */
 function renderResponse(path, rawXml, activeProducts) {
-try {
-const doc = new DOMParser().parseFromString(rawXml, 'application/xml');
-if (path.includes('/plan/')) {
-const now = new Date();
-const station = doc.querySelector('timetable')?.getAttribute('station') || '—';
-const stops = [...doc.querySelectorAll('s')].map(s => {
-const tl=s.querySelector('tl'),dp=s.querySelector('dp'),ar=s.querySelector('ar');
-const cat=tl?.getAttribute('c')||'',f=tl?.getAttribute('f')||'';
-const prod=toProduct(cat,f),ptRaw=dp?.getAttribute('pt')||'';
-return {prod,prodLabel:productLabel(prod),linie:buildLine(cat,dp?.getAttribute('l')||ar?.getAttribute('l')||''),klasse:f||'—',abfahrt:fmtDBTime(ptRaw),abfahrtDate:parseDBTime(ptRaw),abfahrtRaw:ptRaw,ankunft:fmtDBTime(ar?.getAttribute('pt')||''),richtung:(dp?.getAttribute('ppth')||'').split('|').pop()||'—',gleis:dp?.getAttribute('pp')||ar?.getAttribute('pp')||'—'};
+  try {
+    const doc = new DOMParser().parseFromString(rawXml, 'application/xml');
+
+    // ── /station/{name} → Haltestellen-Lookup-Ergebnis ───────────────────
+    // Zeigt EVA-Nummer, Name und DS100-Kürzel aller Treffer.
+    if (path.startsWith('/station/')) {
+      const stations = [...doc.querySelectorAll('station')].map(s => ({
+        eva:   s.getAttribute('eva'),
+        name:  s.getAttribute('name'),
+        ds100: s.getAttribute('ds100') || '—',
+      }));
+      const table = `<table class="resp-table">
+        <thead><tr><th>EVA</th><th>Name</th><th>DS100</th></tr></thead>
+        <tbody>${stations.map(s => `<tr>
+          <td class="resp-mono resp-accent">${esc(s.eva)}</td>
+          <td class="resp-strong">${esc(s.name)}</td>
+          <td class="resp-mono resp-dim">${esc(s.ds100)}</td>
+        </tr>`).join('')}</tbody>
+      </table>`;
+      return makeCollapsible(
+        `Haltestellen <span class="resp-count">${stations.length}</span>`,
+        stations.length ? table : '<div class="resp-empty">Keine Treffer.</div>',
+        true  // aufgeklappt – Ergebnis direkt sichtbar
+      );
+    }
+
+    // ── /plan/{eva}/{date}/{hour} → Fahrplan ─────────────────────────────
+    // Nur Abfahrten in der Zukunft, nur aktive Verkehrsmittel.
+    // Sortiert nach Abfahrtszeit aufsteigend.
+    if (path.includes('/plan/')) {
+      const now     = new Date();
+      const station = doc.querySelector('timetable')?.getAttribute('station') || '—';
+      const stops   = [...doc.querySelectorAll('s')].map(s => {
+        const tl = s.querySelector('tl');
+        const dp = s.querySelector('dp');
+        const ar = s.querySelector('ar');
+        const cat    = tl?.getAttribute('c') || '';
+        const f      = tl?.getAttribute('f') || '';
+        const prod   = toProduct(cat, f);
+        const ptRaw  = dp?.getAttribute('pt') || '';
+        return {
+          prod,
+          prodLabel:   productLabel(prod),
+          linie:       buildLine(cat, dp?.getAttribute('l') || ar?.getAttribute('l') || ''),
+          klasse:      f || '—',
+          abfahrt:     fmtDBTime(ptRaw),
+          abfahrtDate: parseDBTime(ptRaw),
+          abfahrtRaw:  ptRaw,
+          ankunft:     fmtDBTime(ar?.getAttribute('pt') || ''),
+          richtung:    (dp?.getAttribute('ppth') || '').split('|').pop() || '—',
+          gleis:       dp?.getAttribute('pp') || ar?.getAttribute('pp') || '—',
+        };
+      })
+      .filter(s => (!s.abfahrtDate || s.abfahrtDate >= now) && activeProducts.has(s.prod))
+      .sort((a, b) => a.abfahrtRaw.localeCompare(b.abfahrtRaw));
+
+      const table = `<table class="resp-table">
+        <thead><tr><th>Abfahrt</th><th>Linie</th><th>Typ</th><th>Ankunft</th><th>Gl.</th><th>Richtung</th></tr></thead>
+        <tbody>${stops.map(s => `<tr>
+          <td class="resp-mono resp-strong">${esc(s.abfahrt)}</td>
+          <td class="resp-mono resp-accent resp-strong">${esc(s.linie)}</td>
+          <td class="resp-dim">${esc(s.prodLabel)}</td>
+          <td class="resp-mono resp-dim">${esc(s.ankunft)}</td>
+          <td class="resp-mono">${esc(s.gleis)}</td>
+          <td class="resp-dir">${esc(s.richtung)}</td>
+        </tr>`).join('')}</tbody>
+      </table>`;
+      return makeCollapsible(
+        `Fahrplan – <span class="resp-station">${esc(station)}</span> <span class="resp-count">${stops.length} Einträge</span>`,
+        stops.length ? table : '<div class="resp-empty">Keine Einträge für aktive Verkehrsmittel.</div>',
+        false  // zugeklappt – kann viele Zeilen haben
+      );
+    }
+
+    // ── /fchg/{eva} → Echtzeit-Änderungen (Verspätungen, Ausfälle) ───────
+    // Zeigt Status, geplante vs. tatsächliche Abfahrt, neues Gleis und Meldungscodes.
+    if (path.includes('/fchg/')) {
+      const station = doc.querySelector('timetable')?.getAttribute('station') || '—';
+      const changes = [...doc.querySelectorAll('s')].map(s => {
+        const dp = s.querySelector('dp');
+        // cs="c" → Zug ausgefallen; ct vorhanden → Verspätung
+        const status = dp?.getAttribute('cs') === 'c' ? '🚫 Ausfall'
+                     : dp?.getAttribute('ct')         ? '⚠ Verspätung'
+                     : '✓ Planmäßig';
+        return {
+          status,
+          plan:     fmtDBTime(dp?.getAttribute('pt') || ''),
+          echtzeit: fmtDBTime(dp?.getAttribute('ct') || ''),
+          gleis:    dp?.getAttribute('cp') || '—',
+          meldung:  [...s.querySelectorAll('m')].map(m => m.getAttribute('c')).join(', ') || '—',
+        };
+      });
+      if (!changes.length) {
+        return makeCollapsible(
+          `Echtzeit – <span class="resp-station">${esc(station)}</span> <span class="resp-ok">✓ alles planmäßig</span>`,
+          '<div class="resp-empty">Keine Abweichungen.</div>',
+          false
+        );
+      }
+      const table = `<table class="resp-table">
+        <thead><tr><th>Status</th><th>Plan</th><th>Echtzeit</th><th>Gleis</th><th>Meldung</th></tr></thead>
+        <tbody>${changes.map(c => `<tr>
+          <td class="resp-status">${esc(c.status)}</td>
+          <td class="resp-mono resp-dim">${esc(c.plan)}</td>
+          <td class="resp-mono ${c.echtzeit !== '—' ? 'resp-warn' : ''}">${esc(c.echtzeit)}</td>
+          <td class="resp-mono">${esc(c.gleis)}</td>
+          <td class="resp-dim">${esc(c.meldung)}</td>
+        </tr>`).join('')}</tbody>
+      </table>`;
+      return makeCollapsible(
+        `Echtzeit – <span class="resp-station">${esc(station)}</span> <span class="resp-count">${changes.length} Änderungen</span>`,
+        table,
+        false
+      );
+    }
+  } catch(_) {}
+  return '';
 }).filter(s=>(!s.abfahrtDate||s.abfahrtDate>=now)&&activeProducts.has(s.prod))
 .sort((a,b)=>a.abfahrtRaw.localeCompare(b.abfahrtRaw));
 return makeCollapsible(
@@ -1221,6 +1438,10 @@ document.querySelectorAll('[data-close]').forEach(btn =>
 document.querySelectorAll('.modal-backdrop').forEach(bd =>
  bd.addEventListener('click', e => { if (e.target === bd) closeModal(bd.id); })
 );
+/* ── Event-Listener ─────────────────────────────────────────────────────
+   Event-Delegation für Karten-Klicks (data-tripid) vermeidet
+   unsichere inline-onclick-Attribute mit Sonderzeichen.
+   Alle anderen Listener direkt auf die jeweiligen Elemente gebunden.    ──── */
 document.addEventListener('click', e => {
  const card = e.target.closest('.card[data-tripid]');
  if (card) {
@@ -1265,6 +1486,10 @@ document.querySelectorAll('.filter-checks input[type="checkbox"]').forEach(cb =>
  if (S.fromStop && S.toStop) runRefresh();
  })
 );
+/* ── Start ──────────────────────────────────────────────────────────────
+   Reihenfolge: Prefs laden → Sprache/Dark anwenden → Bar initialisieren
+   → Suche starten. loadPrefs() muss als erstes laufen damit Dark Mode
+   sofort (vor dem ersten Paint) aktiv ist – kein Aufblitzen.            ──── */
 loadPrefs();
 applyLang();
 updateThresholdBar();
