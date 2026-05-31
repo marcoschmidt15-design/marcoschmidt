@@ -77,7 +77,7 @@ font-family:var(--sans);-webkit-font-smoothing:antialiased;
 }
 body{
 display:flex;flex-direction:column;align-items:center;
-padding:80px 20px 80px;
+padding:88px 20px 80px;
 padding-bottom:max(80px,env(safe-area-inset-bottom));
 min-height:100vh;
 }
@@ -85,16 +85,21 @@ min-height:100vh;
 .page-header{
 position:fixed;top:0;left:0;right:0;z-index:100;
 display:flex;align-items:center;justify-content:space-between;
-padding:11px 20px;
-padding-top:max(11px,env(safe-area-inset-top));
+padding:14px 20px;
+padding-top:max(14px,env(safe-area-inset-top));
 background:rgba(245,246,248,.93);
 backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
 border-bottom:1px solid var(--border);
 box-shadow:0 1px 8px rgba(0,0,0,.07);
 }
 .page-title{
-font-size:clamp(1.05rem,2.5vw,1.3rem);
+display:flex;align-items:center;gap:10px;
+font-size:clamp(1.1rem,2.5vw,1.4rem);
 font-weight:700;letter-spacing:-.04em;color:var(--text);
+}
+.header-icon{
+width:36px;height:36px;border-radius:9px;flex-shrink:0;
+box-shadow:0 1px 4px rgba(0,0,0,.12);
 }
 .header-actions{display:flex;gap:8px;}
 .btn{
@@ -186,7 +191,7 @@ gap:8px;
 }
 .controls > *{flex:1;justify-content:center;}
 @media (max-width:520px){
-body{padding:76px 12px max(64px,env(safe-area-inset-bottom));}
+body{padding:84px 12px max(64px,env(safe-area-inset-bottom));}
 .station-panel{padding:12px 13px;}
 .page-title{font-size:1.05rem;}
 .station-row{
@@ -357,8 +362,8 @@ transition:background .15s;border-bottom:1px solid transparent;
 .stop-delay{font-size:.62rem;color:var(--red);margin-left:3px;font-weight:600;}
 footer{margin-top:22px;text-align:center;}
 .footer-branding{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:18px;opacity:1;}
-.footer-icon{width:56px;height:56px;border-radius:13px;display:block;}
-.footer-version{font-size:.75rem;color:var(--dim);font-family:var(--mono);letter-spacing:.08em;}
+
+.footer-version{font-size:.75rem;color:var(--muted);font-family:var(--mono);letter-spacing:.08em;}
 #refresh-bar{height:2px;background:var(--border);border-radius:2px;overflow:hidden;}
 #refresh-fill{height:100%;background:var(--accent);transform-origin:left;transition:none;}
 #refresh-fill.draining{transition:transform 30s linear;transform:scaleX(0);}
@@ -550,12 +555,11 @@ border-bottom:1px solid transparent;
 .resp-empty{padding:8px 12px;font-size:.67rem;color:var(--dim);font-style:italic;}</style>
 </head>
 <body>
-<div class="wrap"><!-- HEADER --><div class="page-header"><div class="page-title">TrainTracker</div><div class="header-actions"><button class="btn icon-only" id="btn-route" title="Strecke">🗺</button><button class="btn icon-only" id="btn-log" title="Protokoll">📋</button><button class="btn icon-only" id="btn-settings" title="Einstellungen">⚙</button></div></div><!-- STATION INPUT --><div class="station-panel"><div class="station-row"><div class="input-group"><label class="input-label" for="inp-from" data-i18n="from">Von</label><input id="inp-from" class="station-input"
+<div class="wrap"><!-- HEADER --><div class="page-header"><div class="page-title"><img src="icon512.png" alt="" class="header-icon" />TrainTracker</div><div class="header-actions"><button class="btn icon-only" id="btn-route" title="Strecke">🗺</button><button class="btn icon-only" id="btn-log" title="Protokoll">📋</button><button class="btn icon-only" id="btn-settings" title="Einstellungen">⚙</button></div></div><!-- STATION INPUT --><div class="station-panel"><div class="station-row"><div class="input-group"><label class="input-label" for="inp-from" data-i18n="from">Von</label><input id="inp-from" class="station-input"
  placeholder="Name oder EVA-Nr." data-i18n-placeholder="stationPlaceholder" value="Stuttgart Stadtmitte" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="none" /><div class="eva-badge" id="eva-from"></div></div><button class="swap-btn" id="btn-swap" data-i18n-title="swap" title="Tauschen">⇄</button><div class="input-group"><label class="input-label" for="inp-to" data-i18n="to">Nach</label><input id="inp-to" class="station-input"
  placeholder="Name oder EVA-Nr." data-i18n-placeholder="stationPlaceholder" value="Stuttgart-Feuerbach" autocomplete="off" spellcheck="false" autocorrect="off" autocapitalize="none" /><div class="eva-badge" id="eva-to"></div></div></div><div class="controls"><button class="btn primary" id="btn-go"><span id="go-icon">🔍</span><span id="go-label" data-i18n="search">Suchen</span></button><button class="btn auto-off" id="btn-auto"><span>⏱</span><span id="auto-label" data-i18n="autoOff">Auto-Refresh AUS</span></button><!-- Wechselpfeile in Controls-Zeile (nur Mobile sichtbar) --><button class="swap-btn" id="btn-swap-controls" data-i18n-title="swap" title="Tauschen">⇄</button></div></div><!-- STATUS BAR --><div class="status-bar"><div class="route-display"><span class="pulse-dot off" id="pulse-dot"></span><span id="route-text">—</span></div><span class="last-update" id="last-update"></span></div><!-- DEPARTURE BOARD --><div id="board"><div class="state-card"><div class="state-icon">🚉</div><div class="state-title" data-i18n="readyTitle">Bereit</div><div class="state-msg" data-i18n="readyMsg">Start- und Zielbahnhof eingeben und auf <strong>Suchen</strong> klicken.</div></div></div><!-- ROUTE PANEL --><div id="route-panel"></div><!-- FOOTER: Ladebalken + Icon + Version --><footer>
 <div id="refresh-bar"><div id="refresh-fill"></div></div>
 <div class="footer-branding">
-<img src="icon512.png" alt="TrainTracker" class="footer-icon" />
 <span class="footer-version">Version 1.0</span>
 </div>
 </footer></div><!-- /.wrap --><!-- ══════════════════════════════════════
